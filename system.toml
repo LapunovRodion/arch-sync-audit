@@ -1,0 +1,9 @@
+pacman_packages = [
+    "neovim",
+    "ripgrep",
+]
+aur_packages = ["visual-studio-code-bin"]
+shell = "/bin/zsh"
+config_paths = ["~/.zshrc"]
+system_services = []
+user_services = []
