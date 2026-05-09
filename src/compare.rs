@@ -1,12 +1,12 @@
 use crate::profile::SystemProfile;
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub struct ProfileDiff {
     pub missing_pacman_packages: Vec<String>,
     pub missing_aur_packages: Vec<String>,
     pub shell_diff: Option<ShellDiff>,
 }
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub struct ShellDiff {
     pub expected: String,
     pub current: Option<String>,
@@ -73,6 +73,31 @@ mod tests {
         let diff = compare_profiles(&expected, &current);
         assert_eq!(diff.missing_aur_packages,vec!["visual-studio-code-bin"]);
     }
+
+    #[test]
+    fn detects_different_shell() {
+        let expected = profile(vec![], vec![],Some("/bin/zsh"));
+        let current= profile(vec![], vec![],Some("/bin/bash"));
+        let diff = compare_profiles(&expected, &current);
+        assert_eq!(
+            diff.shell_diff,
+            Some(ShellDiff{
+                expected: "/bin/zsh".to_string(),
+                current: Some("/bin/bash".to_string()),
+            })
+        );
+
+    }
+    #[test]
+   fn returns_empty_diff_when_profiles_match(){
+        let expected = profile(vec!["neovim","ripgrep"], vec!["visual-studio-code-bin"],Some("/bin/zsh"));
+        let current= profile(vec!["neovim","ripgrep"], vec!["visual-studio-code-bin"],Some("/bin/zsh"));       
+        let diff = compare_profiles(&expected, &current);
+        assert_eq!(diff.missing_pacman_packages,Vec::<String>::new());
+        assert_eq!(diff.missing_aur_packages,Vec::<String>::new());
+        assert_eq!(diff.shell_diff,None);
+   }
+
 }
 
 
