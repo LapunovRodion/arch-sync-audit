@@ -1,12 +1,12 @@
 use crate::profile::SystemProfile;
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct ProfileDiff {
     pub missing_pacman_packages: Vec<String>,
     pub missing_aur_packages: Vec<String>,
     pub shell_diff: Option<ShellDiff>,
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct ShellDiff {
     pub expected: String,
     pub current: Option<String>,
@@ -44,61 +44,62 @@ mod tests {
     use super::*;
     fn profile(
         pacman_packages: Vec<&str>,
-        aur_packages:Vec<&str>,
-        shell: Option <&str>,
+        aur_packages: Vec<&str>,
+        shell: Option<&str>,
     ) -> SystemProfile {
-        SystemProfile{
-            pacman_packages:pacman_packages.into_iter().map(String::from).collect(),
+        SystemProfile {
+            pacman_packages: pacman_packages.into_iter().map(String::from).collect(),
             aur_packages: aur_packages.into_iter().map(String::from).collect(),
-            shell:shell.map(String::from),
-            config_paths:vec![],
-            system_services:vec![],
-            user_services:vec![],
+            shell: shell.map(String::from),
+            config_paths: vec![],
+            system_services: vec![],
+            user_services: vec![],
         }
     }
     #[test]
-    fn detects_missing_pacman_package()
-    {
-        let expected = profile(vec!["neovim", "ripgrep"], vec![],Some("/bin/zsh"));
-        let current= profile(vec!["neovim" ], vec![],Some("/bin/zsh"));
+    fn detects_missing_pacman_package() {
+        let expected = profile(vec!["neovim", "ripgrep"], vec![], Some("/bin/zsh"));
+        let current = profile(vec!["neovim"], vec![], Some("/bin/zsh"));
         let diff = compare_profiles(&expected, &current);
-        assert_eq!(diff.missing_pacman_packages,vec!["ripgrep"]);
+        assert_eq!(diff.missing_pacman_packages, vec!["ripgrep"]);
     }
 
     #[test]
-    fn detects_missing_aur_package()
-    {
-        let expected = profile(vec![], vec!["visual-studio-code-bin"],Some("/bin/zsh"));
-        let current= profile(vec![], vec![],Some("/bin/zsh"));
+    fn detects_missing_aur_package() {
+        let expected = profile(vec![], vec!["visual-studio-code-bin"], Some("/bin/zsh"));
+        let current = profile(vec![], vec![], Some("/bin/zsh"));
         let diff = compare_profiles(&expected, &current);
-        assert_eq!(diff.missing_aur_packages,vec!["visual-studio-code-bin"]);
+        assert_eq!(diff.missing_aur_packages, vec!["visual-studio-code-bin"]);
     }
 
     #[test]
     fn detects_different_shell() {
-        let expected = profile(vec![], vec![],Some("/bin/zsh"));
-        let current= profile(vec![], vec![],Some("/bin/bash"));
+        let expected = profile(vec![], vec![], Some("/bin/zsh"));
+        let current = profile(vec![], vec![], Some("/bin/bash"));
         let diff = compare_profiles(&expected, &current);
         assert_eq!(
             diff.shell_diff,
-            Some(ShellDiff{
+            Some(ShellDiff {
                 expected: "/bin/zsh".to_string(),
                 current: Some("/bin/bash".to_string()),
             })
         );
-
     }
     #[test]
-   fn returns_empty_diff_when_profiles_match(){
-        let expected = profile(vec!["neovim","ripgrep"], vec!["visual-studio-code-bin"],Some("/bin/zsh"));
-        let current= profile(vec!["neovim","ripgrep"], vec!["visual-studio-code-bin"],Some("/bin/zsh"));       
+    fn returns_empty_diff_when_profiles_match() {
+        let expected = profile(
+            vec!["neovim", "ripgrep"],
+            vec!["visual-studio-code-bin"],
+            Some("/bin/zsh"),
+        );
+        let current = profile(
+            vec!["neovim", "ripgrep"],
+            vec!["visual-studio-code-bin"],
+            Some("/bin/zsh"),
+        );
         let diff = compare_profiles(&expected, &current);
-        assert_eq!(diff.missing_pacman_packages,Vec::<String>::new());
-        assert_eq!(diff.missing_aur_packages,Vec::<String>::new());
-        assert_eq!(diff.shell_diff,None);
-   }
-
+        assert_eq!(diff.missing_pacman_packages, Vec::<String>::new());
+        assert_eq!(diff.missing_aur_packages, Vec::<String>::new());
+        assert_eq!(diff.shell_diff, None);
+    }
 }
-
-
-
